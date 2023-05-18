@@ -2,7 +2,6 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { getMovieCredits } from 'services/api';
 import { CastListItem } from 'components/CastListItem';
-import { Logo } from 'components/SharedLayout/SharedLayout.styled';
 import { List, Title } from './Cast.styled';
 
 const Cast = () => {

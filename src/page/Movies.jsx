@@ -9,7 +9,6 @@ const Movies = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchWord, setSearchWord] = useState(searchParams.get('name') ?? '');
   const [errorMasseg, setErrorMasseg] = useState(null);
-  const [warning, setWarning] = useState(null);
   const location = useLocation();
   const controllerRef = useRef(new AbortController());
   const controller = controllerRef.current;

@@ -1,4 +1,4 @@
-import { Link, Outlet, useParams, useLocation } from 'react-router-dom';
+import { Outlet, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { getMovie } from 'services/api';
 import { Suspense } from 'react';
