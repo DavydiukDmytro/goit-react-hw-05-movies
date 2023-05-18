@@ -1,16 +1,18 @@
 import { getTranding } from 'services/api';
 import { useEffect, useState, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
 import { MoviesGallery } from 'components/MoviesGallery';
+import { Loader } from 'components/Loader';
 
 const Home = () => {
   const [trandingList, setTrandingList] = useState([]);
   const [error, setError] = useState(null);
-  const location = useLocation();
+  const [isLoad, setIsLoad] = useState(false);
+
   const controllerRef = useRef(new AbortController());
   const controller = controllerRef.current;
 
   useEffect(() => {
+    setIsLoad(true);
     fetchTranding(controller.signal);
     return () => {
       controller.abort();
@@ -22,23 +24,22 @@ const Home = () => {
       const response = await getTranding(signal);
       setTrandingList(response?.results || []);
       setError(response?.message || null);
+      setIsLoad(false);
     } catch (error) {
       setError(error?.message || 'Error');
+      setIsLoad(false);
     }
   };
 
   return (
     <>
-      {trandingList.length > 0 && (
+      {trandingList.length !== 0 && (
         <>
           <h1 className="title">Tranding today</h1>
-          <MoviesGallery
-            moviesArr={trandingList}
-            location={location}
-            linkTo={'movies/'}
-          />
+          <MoviesGallery moviesArr={trandingList} />
         </>
       )}
+      {isLoad && <Loader />}
       {error && (
         <>
           <h1 className="title">

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Formik } from 'formik';
 import {
   FormSearch,
@@ -22,4 +23,9 @@ export const SearchForm = ({ searchWord, handleSubmit }) => {
       </FormSearch>
     </Formik>
   );
+};
+
+SearchForm.propTypes = {
+  searchWord: PropTypes.string.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
 };

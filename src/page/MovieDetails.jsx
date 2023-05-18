@@ -4,7 +4,7 @@ import { getMovie } from 'services/api';
 import { Suspense } from 'react';
 import { BackLink, SubTitle, LinkTo } from './MovieDetails.styled';
 import { MovieInfo } from 'components/MovieInfo';
-import { ThreeDots } from 'react-loader-spinner';
+import { Loader } from 'components/Loader';
 
 const MovieDetails = () => {
   const { movieId } = useParams();
@@ -12,10 +12,12 @@ const MovieDetails = () => {
   const [error, setError] = useState(null);
   const location = useLocation();
   const backLinkLocation = useRef(location.state?.from ?? '/');
+  const [isLoad, setIsLoad] = useState(false);
   const controllerRef = useRef(new AbortController());
   const controller = controllerRef.current;
 
   useEffect(() => {
+    setIsLoad(true);
     fetchMovie(movieId, controller.signal);
 
     return () => {
@@ -30,8 +32,10 @@ const MovieDetails = () => {
         setMovie(response);
       }
       setError(response?.message || null);
+      setIsLoad(false);
     } catch (error) {
       setError(error);
+      setIsLoad(false);
     }
   };
   return (
@@ -45,6 +49,7 @@ const MovieDetails = () => {
           <LinkTo to={`reviews`}>Reviews</LinkTo>
         </>
       )}
+      {isLoad && <Loader />}
       {error && (
         <>
           <h1 className="title">
@@ -53,19 +58,7 @@ const MovieDetails = () => {
           <p style={{ textAlign: 'center' }}>Error: {error}</p>
         </>
       )}
-      <Suspense
-        fallback={
-          <ThreeDots
-            height="80"
-            width="80"
-            radius="9"
-            color="#9fa9b5"
-            ariaLabel="three-dots-loading"
-            wrapperClassName=""
-            visible={true}
-          />
-        }
-      >
+      <Suspense fallback={<Loader />}>
         <Outlet />
       </Suspense>
     </>

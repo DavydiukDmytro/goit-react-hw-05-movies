@@ -8,14 +8,19 @@ import {
   Text,
   ListIItem,
 } from './MovieInfo.styled';
+import placeholderImage from 'images/movie.png';
 
 export const MovieInfo = ({ movie }) => {
   return (
     <ContainerInfo>
       <Img
         className="img"
-        alt={movie.original_title}
-        src={`https://image.tmdb.org/t/p/w400${movie.poster_path}`}
+        alt={movie.title}
+        src={
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w400${movie.poster_path}`
+            : placeholderImage
+        }
       />
       <TextInfo>
         <Title>{movie.original_title}</Title>
@@ -36,8 +41,15 @@ export const MovieInfo = ({ movie }) => {
 
 MovieInfo.propTypes = {
   movie: PropTypes.shape({
-    original_title: PropTypes.string,
+    title: PropTypes.string.isRequired,
+    original_title: PropTypes.string.isRequired,
+    poster_path: PropTypes.string,
     overview: PropTypes.string,
-    genres: PropTypes.array,
-  }),
+    genres: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        name: PropTypes.string.isRequired,
+      })
+    ),
+  }).isRequired,
 };

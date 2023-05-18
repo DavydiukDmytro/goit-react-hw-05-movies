@@ -2,15 +2,18 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { getMovieReviews } from 'services/api';
 import { Title, Item, SubTitle, Text } from './Reviews.styled';
+import { Loader } from 'components/Loader';
 
 const Reviews = () => {
   const { movieId } = useParams();
   const [reviews, setReviews] = useState(null);
   const [error, setError] = useState(null);
+  const [isLoad, setIsLoad] = useState(false);
   const controllerRef = useRef(new AbortController());
   const controller = controllerRef.current;
 
   useEffect(() => {
+    setIsLoad(true);
     fetchReviews(movieId, controller.signal);
     return () => {
       controller.abort();
@@ -22,8 +25,10 @@ const Reviews = () => {
       const response = await getMovieReviews(id);
       setReviews(response?.results || null);
       setError(response?.message || null);
+      setIsLoad(false);
     } catch (error) {
       setError(error);
+      setIsLoad(false);
     }
   };
 
@@ -46,6 +51,7 @@ const Reviews = () => {
             ))}
           </ul>
         ))}
+      {isLoad && <Loader />}
       {error && (
         <>
           <Title>Oops, something went wrong, please try again later.</Title>

@@ -9,7 +9,7 @@ import {
   Nav,
   LinkPage,
 } from './SharedLayout.styled';
-import { ThreeDots } from 'react-loader-spinner';
+import { Loader } from 'components/Loader';
 
 export const SharedLayout = () => {
   return (
@@ -28,20 +28,7 @@ export const SharedLayout = () => {
       </Container>
       <Container>
         <main>
-          <Suspense
-            fallback={
-              <ThreeDots
-                height="80"
-                width="80"
-                radius="9"
-                color="#9fa9b5"
-                ariaLabel="three-dots-loading"
-                wrapperStyle={{ justifyContent: 'center' }}
-                wrapperClassName=""
-                visible={true}
-              />
-            }
-          >
+          <Suspense fallback={<Loader />}>
             <Outlet />
           </Suspense>
         </main>

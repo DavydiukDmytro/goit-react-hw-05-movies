@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Item, Img, Title, Text } from './CastListItem.styled';
 import placeholderImage from 'images/movie.png';
 
@@ -7,7 +8,11 @@ export const CastListItem = ({ cast }) => {
       <Img
         className="img"
         alt={cast.name}
-        src={`https://image.tmdb.org/t/p/w200${cast.profile_path}`}
+        src={
+          cast.profile_path
+            ? `https://image.tmdb.org/t/p/w200${cast.profile_path}`
+            : placeholderImage
+        }
         onError={e => {
           e.target.src = placeholderImage;
         }}
@@ -18,4 +23,12 @@ export const CastListItem = ({ cast }) => {
       <Text>{cast.character}</Text>
     </Item>
   );
+};
+
+CastListItem.propTypes = {
+  cast: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    character: PropTypes.string.isRequired,
+    profile_path: PropTypes.string,
+  }).isRequired,
 };

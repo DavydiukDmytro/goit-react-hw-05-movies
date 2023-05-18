@@ -11,6 +11,8 @@ export const TextInfo = styled.div`
 
 export const Img = styled.img`
   border-radius: 10px;
+  width: 400px;
+  height: 600px;
 `;
 
 export const Title = styled.h1`

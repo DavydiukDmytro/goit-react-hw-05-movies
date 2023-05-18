@@ -6,21 +6,33 @@ import {
   MoveiTitle,
 } from './MoviesGalleryItem.styled';
 import placeholderImage from 'images/movie.png';
+import { useLocation } from 'react-router-dom';
 
-export const MoviesGalleryItem = ({ movie, location, linkTo }) => {
+export const MoviesGalleryItem = ({ movie }) => {
+  const location = useLocation();
+
   return (
     <GalleryItem>
-      <MoveiLink to={`${linkTo}${movie.id}`} state={{ from: location }}>
+      <MoveiLink to={`/movies/${movie.id}`} state={{ from: location }}>
         <MoveiImg
           className="img"
           alt={movie.title}
           width="400px"
-          src={`https://image.tmdb.org/t/p/w300${movie.backdrop_path}`}
-          onError={e => {
-            e.target.src = placeholderImage;
-          }}
+          src={
+            movie.backdrop_path
+              ? `https://image.tmdb.org/t/p/w300${movie.backdrop_path}`
+              : movie.poster_path
+              ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+              : placeholderImage
+          }
         />
-        <MoveiTitle> {movie.title || 'No name'}</MoveiTitle>
+        <MoveiTitle>
+          {movie.title ||
+            movie.name ||
+            movie.original_title ||
+            movie.original_name ||
+            'No name'}
+        </MoveiTitle>
       </MoveiLink>
     </GalleryItem>
   );
@@ -29,9 +41,11 @@ export const MoviesGalleryItem = ({ movie, location, linkTo }) => {
 MoviesGalleryItem.propTypes = {
   movie: PropTypes.shape({
     id: PropTypes.number.isRequired,
-    backdrop_path: PropTypes.string,
     title: PropTypes.string,
-  }),
-  location: PropTypes.object,
-  linkTo: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    original_title: PropTypes.string,
+    original_name: PropTypes.string,
+    backdrop_path: PropTypes.string,
+    poster_path: PropTypes.string,
+  }).isRequired,
 };
