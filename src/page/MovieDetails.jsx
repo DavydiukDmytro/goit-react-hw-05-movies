@@ -1,43 +1,71 @@
-import { Link, Outlet, useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { Link, Outlet, useParams, useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 import { getMovie } from 'services/api';
 import { Suspense } from 'react';
+import { BackLink, SubTitle, LinkTo } from './MovieDetails.styled';
+import { MovieInfo } from 'components/MovieInfo';
+import { ThreeDots } from 'react-loader-spinner';
 
 const MovieDetails = () => {
   const { movieId } = useParams();
-  const [movie, setMovie] = useState({});
+  const [movie, setMovie] = useState(null);
+  const [error, setError] = useState(null);
+  const location = useLocation();
+  const backLinkLocation = useRef(location.state?.from ?? '/');
+  const controllerRef = useRef(new AbortController());
+  const controller = controllerRef.current;
 
   useEffect(() => {
-    fetchMovie(movieId);
-  }, [movieId]);
+    fetchMovie(movieId, controller.signal);
 
-  const fetchMovie = async id => {
+    return () => {
+      controller.abort();
+    };
+  }, [controller, movieId]);
+
+  const fetchMovie = async (id, signal) => {
     try {
-      const response = await getMovie(id);
-      if (response) {
+      const response = await getMovie(id, signal);
+      if (response.id) {
         setMovie(response);
       }
+      setError(response?.message || null);
     } catch (error) {
-      console.log(error);
+      setError(error);
     }
   };
   return (
     <>
-      <h1>{movie.original_title}</h1>
-      <h2>Overview</h2>
-      <p>{movie.overview}</p>
-      <h2>Genres</h2>
-      {movie.genres && (
-        <ul>
-          {movie.genres.map(genre => (
-            <li key={genre.id}>{genre.name}</li>
-          ))}
-        </ul>
+      <BackLink to={backLinkLocation.current}>Back</BackLink>
+      {movie && (
+        <>
+          <MovieInfo movie={movie} />
+          <SubTitle>Additional information</SubTitle>
+          <LinkTo to={`cast`}>Cast</LinkTo>
+          <LinkTo to={`reviews`}>Reviews</LinkTo>
+        </>
       )}
-      <p>Additional information</p>
-      <Link to={`cast`}>Cast</Link>
-      <Link to={`reviews`}>Reviews</Link>
-      <Suspense fallback={<div>Loading subpage...</div>}>
+      {error && (
+        <>
+          <h1 className="title">
+            Oops, something went wrong, please try again later.
+          </h1>
+          <p style={{ textAlign: 'center' }}>Error: {error}</p>
+        </>
+      )}
+      <Suspense
+        fallback={
+          <ThreeDots
+            height="80"
+            width="80"
+            radius="9"
+            color="#9fa9b5"
+            ariaLabel="three-dots-loading"
+            wrapperClassName=""
+            visible={true}
+          />
+        }
+      >
         <Outlet />
       </Suspense>
     </>

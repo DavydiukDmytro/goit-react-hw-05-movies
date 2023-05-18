@@ -1,37 +1,50 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getMovieCredits } from 'services/api';
+import { CastListItem } from 'components/CastListItem';
+import { Logo } from 'components/SharedLayout/SharedLayout.styled';
+import { List, Title } from './Cast.styled';
 
 const Cast = () => {
   const { movieId } = useParams();
-  const [castList, setCastList] = useState([]);
+  const [castList, setCastList] = useState(null);
+  const [error, setError] = useState(null);
+  const controllerRef = useRef(new AbortController());
+  const controller = controllerRef.current;
 
   useEffect(() => {
-    fetchCast(movieId);
-  }, [movieId]);
+    fetchCast(movieId, controller.signal);
+    return () => {
+      controller.abort();
+    };
+  }, [controller, movieId]);
 
-  const fetchCast = async id => {
+  const fetchCast = async (id, signal) => {
     try {
-      const response = await getMovieCredits(id);
-      if (response) {
-        setCastList(response.cast);
-      }
+      const response = await getMovieCredits(id, signal);
+      setCastList(response?.cast || null);
+      setError(response?.message || null);
     } catch (error) {
-      console.log(error);
+      setError(error);
     }
   };
 
   return (
-    <ul>
-      {castList.map(cast => (
-        <li key={cast.cast_id}>
-          <p>Name:</p>
-          <p>{cast.name}</p>
-          <p>Character:</p>
-          <p>{cast.character}</p>
-        </li>
-      ))}
-    </ul>
+    <>
+      {castList && (
+        <List>
+          {castList.map(cast => (
+            <CastListItem key={cast.cast_id} cast={cast} />
+          ))}
+        </List>
+      )}
+      {error && (
+        <>
+          <Title>Oops, something went wrong, please try again later.</Title>
+          <p>Error: {error}</p>
+        </>
+      )}
+    </>
   );
 };
 

@@ -1,39 +1,58 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getMovieReviews } from 'services/api';
+import { Title, Item, SubTitle, Text } from './Reviews.styled';
 
 const Reviews = () => {
   const { movieId } = useParams();
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState(null);
+  const [error, setError] = useState(null);
+  const controllerRef = useRef(new AbortController());
+  const controller = controllerRef.current;
 
   useEffect(() => {
-    fetchReviews(movieId);
-  }, [movieId]);
+    fetchReviews(movieId, controller.signal);
+    return () => {
+      controller.abort();
+    };
+  }, [controller, movieId]);
 
-  const fetchReviews = async id => {
+  const fetchReviews = async (id, signal) => {
     try {
       const response = await getMovieReviews(id);
-      if (response) {
-        setReviews(response.results);
-      }
+      setReviews(response?.results || null);
+      setError(response?.message || null);
     } catch (error) {
-      console.log(error);
+      setError(error);
     }
   };
 
-  return reviews.length < 1 ? (
-    <p>0</p>
-  ) : (
-    <ul>
-      {reviews.map(review => (
-        <li key={review.id}>
-          <p>author</p>
-          <p>{review.author}</p>
-          <p>content</p>
-          <p>{review.content}</p>
-        </li>
-      ))}
-    </ul>
+  return (
+    <>
+      {reviews &&
+        (reviews.length < 1 ? (
+          <Text style={{ marginTop: '10px' }}>
+            We don`t have any reviews for this movie
+          </Text>
+        ) : (
+          <ul>
+            {reviews.map(review => (
+              <Item key={review.id}>
+                <SubTitle>Author:</SubTitle>
+                <Text>{review.author}</Text>
+                <SubTitle className="sub">Content:</SubTitle>
+                <Text>{review.content}</Text>
+              </Item>
+            ))}
+          </ul>
+        ))}
+      {error && (
+        <>
+          <Title>Oops, something went wrong, please try again later.</Title>
+          <p>Error: {error}</p>
+        </>
+      )}
+    </>
   );
 };
 

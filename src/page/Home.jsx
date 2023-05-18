@@ -1,35 +1,52 @@
 import { getTranding } from 'services/api';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { MoviesGallery } from 'components/MoviesGallery';
 
 const Home = () => {
   const [trandingList, setTrandingList] = useState([]);
+  const [error, setError] = useState(null);
+  const location = useLocation();
+  const controllerRef = useRef(new AbortController());
+  const controller = controllerRef.current;
 
   useEffect(() => {
-    fetchTranding();
-  }, []);
+    fetchTranding(controller.signal);
+    return () => {
+      controller.abort();
+    };
+  }, [controller]);
 
-  const fetchTranding = async () => {
+  const fetchTranding = async signal => {
     try {
-      const response = await getTranding();
-      if (response.results) {
-        setTrandingList(response.results);
-      }
+      const response = await getTranding(signal);
+      setTrandingList(response?.results || []);
+      setError(response?.message || null);
     } catch (error) {
-      console.log(error);
+      setError(error?.message || 'Error');
     }
   };
 
   return (
     <>
-      <h1>Tranding today</h1>
-      <ul>
-        {trandingList.map(tranding => (
-          <li key={tranding.id}>
-            <Link to={`movies/${tranding.id}`}>{tranding.title}</Link>
-          </li>
-        ))}
-      </ul>
+      {trandingList.length > 0 && (
+        <>
+          <h1 className="title">Tranding today</h1>
+          <MoviesGallery
+            moviesArr={trandingList}
+            location={location}
+            linkTo={'movies/'}
+          />
+        </>
+      )}
+      {error && (
+        <>
+          <h1 className="title">
+            Oops, something went wrong, please try again later.
+          </h1>
+          <p style={{ textAlign: 'center' }}>Error: {error}</p>
+        </>
+      )}
     </>
   );
 };
